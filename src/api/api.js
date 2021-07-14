@@ -1,24 +1,22 @@
-const API_URL = 'http://127.0.0.1:9800'
+const API_URL = 'http://127.0.0.1:9800';
 
 export function getTodosFromServer(options) {
   return fetch(`${API_URL}${options}`)
-    .then(response => response.json())
-    .then(res => {
-      return res
-    })
+    .then((response) => response.json())
+    .then((res) => res);
 }
 
 export function queryToServer(options, method, data) {
+  // eslint-disable-next-line no-console
+  console.log(`DATA: ${data}`);
   return fetch(`${API_URL}${options}`, {
-    method: method,
+    method,
     headers: {
-      "Content-type": "application/json",
+      'Content-type': 'application/json',
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   })
-    .then(response => {
-      return response.ok
-    })
+    .then((response) => response.ok);
 }
 
 // async loadTodos() {
