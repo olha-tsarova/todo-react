@@ -1,24 +1,28 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import ClearCompletedButton from '../ClearCompletedButton/ClearCompletedButton.jsx'
-import FilterButtons from '../FilterButtons/FilterButtons.jsx'
-import ActiveTodosCounter from '../ActiveTodosCounter/ActiveTodosCounter.jsx'
+import ClearCompletedButton from './ClearCompletedButton.jsx'
+import FilterButtons from './FilterButtons.jsx'
+import ActiveTodosCounter from './ActiveTodosCounter.jsx'
 
-const FooterSection = (
-  {
-    todos, activeFilter, setFilter, clearCompleted
-  }
-) => {
+const FooterSection = ({
+  todos,
+  activeFilter,
+  setFilter,
+  clearCompleted
+}) => {
   const activeTodos = todos.filter((todo) => !todo.completed)
   const completedTodos = todos.filter((todo) => todo.completed)
 
   return (
-    <section className='footer'>
+    <section className="footer">
       {activeTodos.length > 0 && (
         <ActiveTodosCounter activeTodos={activeTodos} />
       )}
-      <FilterButtons activeFilter={activeFilter} setFilter={setFilter} />
+      <FilterButtons
+        activeFilter={activeFilter}
+        setFilter={setFilter}
+      />
       {completedTodos.length > 0 && (
         <ClearCompletedButton clearCompleted={clearCompleted} />
       )}

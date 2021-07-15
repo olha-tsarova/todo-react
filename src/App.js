@@ -1,39 +1,47 @@
-/* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable no-param-reassign */
-/* eslint-disable no-underscore-dangle */
-import { useEffect, useState } from 'react'
+// eslint-disable-next-line object-curly-newline
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import uuid from 'react-uuid'
 import MainSection from './components/MainSection'
 import FooterSection from './components/FooterSection'
 import Context from './utils/context'
 import { getTodosFromServer, queryToServer } from './api/api'
-import { filters, endpoints, fetchMethods } from './utils/_constants'
+import { filters, endpoints, fetchMethods } from './utils/constants'
 
 function App() {
   const [todoItems, setTodos] = useState([])
   const [todoToRender, setTodosToRender] = useState(todoItems)
-  const [activeFilter, setFilter] = useState(filters.filter_all)
+  const [activeFilter, setFilter] = useState(filters.all)
+  const todosRef = useRef()
+
+  todosRef.current = todoItems
 
   useEffect(() => {
     getTodosFromServer(endpoints.GET_TODOS_URL)
-      .then((response) => setTodos(response))
+      .then((response) => {
+        if (response) {
+          setTodos(response)
+        } else {
+          console.error('Sorry, something went wrong')
+        }
+      })
   }, [])
 
   useEffect(() => {
-    if (activeFilter === filters.filter_active) {
-      setTodosToRender(todoItems.filter((todo) => !todo.completed))
+    if (activeFilter === filters.active) {
+      setTodosToRender(todosRef.current.filter((todo) => !todo.completed))
     }
 
-    if (activeFilter === filters.filter_completed) {
-      setTodosToRender(todoItems.filter((todo) => todo.completed))
+    if (activeFilter === filters.completed) {
+      setTodosToRender(todosRef.current.filter((todo) => todo.completed))
     }
 
-    if (activeFilter === filters.filter_all) {
-      setTodosToRender(todoItems)
+    if (activeFilter === filters.all) {
+      setTodosToRender(todosRef.current)
     }
-  }, [activeFilter, todoItems])
+  }, [activeFilter, todosRef.current])
 
-  const addTodo = (text) => {
+  const addTodo = useCallback((text) => {
     const task = text.trim()
     if (!task) {
       return
@@ -49,67 +57,86 @@ function App() {
       .then((res) => {
         if (res) {
           setTodos([
-            ...todoItems,
+            ...todosRef.current,
             newTodo
           ])
+        } else {
+          console.error('Sorry, something went wrong')
         }
       })
-  }
+  }, [])
 
   const removeTodo = (todoId) => {
     queryToServer(endpoints.DELETE_TODOS_URL, fetchMethods.M_DELETE, todoId)
       .then((res) => {
         if (res) {
-          setTodos(todoItems.filter((todo) => todo._id !== todoId))
+          setTodos((state) => state.filter((todo) => todo.key !== todoId))
+        } else {
+          console.error('Sorry, something went wrong')
         }
       })
   }
 
-  const changeStatus = (todoId) => {
-    const todoForChange = todoItems.find((todo) => todo._id === todoId)
+  const changeStatus = useCallback((todoKey) => {
+    const todoForChange = todosRef.current.find((todo) => todo.key === todoKey)
+    const changedTodos = todosRef.current.map((todo) => {
+      if (todo.key === todoKey) {
+        todo.completed = !todo.completed
+      }
+      return todo
+    })
 
     queryToServer(endpoints.EDIT_TODO_URL, fetchMethods.M_PATCH, todoForChange)
       .then((res) => {
         if (res) {
-          setTodos(todoItems.map((todo) => {
-            if (todo._id === todoId) {
-              todo.completed = !todo.completed
-            }
-            return todo
-          }))
+          setTodos(changedTodos)
+        } else {
+          console.error('Sorry, something went wrong')
         }
       })
-  }
+  }, [])
 
-  const clearCompleted = () => {
-    const completedTodos = todoItems.filter((todo) => todo.completed)
-    const completedTodosIds = []
-    completedTodos.forEach((todo) => completedTodosIds.push(todo._id))
+  const clearCompleted = useCallback(() => {
+    const completedTodos = todosRef.current.filter((todo) => todo.completed)
+    const completedTodosKeys = []
+    completedTodos.forEach((todo) => completedTodosKeys.push(todo.key))
 
-    queryToServer(endpoints.DELETE_TODOS_URL, fetchMethods.M_DELETE, completedTodosIds)
+    queryToServer(endpoints.DELETE_TODOS_URL, fetchMethods.M_DELETE, completedTodosKeys)
       .then((res) => {
         if (res) {
           setTodos((state) => state.filter((todo) => !todo.completed))
+        } else {
+          console.error('Sorry, something went wrong')
         }
       })
-  }
+  }, [todoItems])
 
-  const toggleAll = (status) => {
+  const toggleAll = useCallback((status) => {
     const todosData = {
-      ids: [], data: { completed: status }
+      keys: [], data: { completed: status }
     }
 
-    todoItems.forEach((todo) => {
-      todosData.ids.push(todo._id)
+    todosRef.current.forEach((todo) => {
+      todosData.keys.push(todo.key)
     })
 
     queryToServer(endpoints.CHANGE_STATUSES_URL, fetchMethods.M_PATCH, todosData)
       .then((res) => {
         if (res) {
-          setTodos(todoItems.map((todo) => ({ ...todo, completed: status })))
+          setTodos(todosRef.current.map((todo) => ({ ...todo, completed: status })))
+        } else {
+          console.error('Sorry, something went wrong')
         }
       })
-  }
+  }, [])
+
+  const handlerAddTodo = useCallback((event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      addTodo(event.target.value)
+      event.target.value = ''
+    }
+  })
 
   return (
     <Context.Provider value={{ toggleAll }}>
@@ -122,13 +149,7 @@ function App() {
               type="text"
               placeholder="What needs to be done?"
               autoFocus
-              onKeyPress={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault()
-                  addTodo(event.target.value)
-                  event.target.value = ''
-                }
-              }}
+              onKeyPress={handlerAddTodo}
             />
           </form>
         </header>
@@ -137,7 +158,7 @@ function App() {
           <>
             <MainSection
               todos={todoToRender}
-              allTodos={todoItems}
+              allTodos={todosRef.current}
               changeStatus={changeStatus}
               removeTodo={removeTodo}
             />

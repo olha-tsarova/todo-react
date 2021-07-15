@@ -1,14 +1,11 @@
-/* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
 
 const ClearCompletedButton = ({ clearCompleted }) => (
   <button
-    className='clear-completed'
-    type='button'
-    onClick={() => {
-      clearCompleted()
-    }}
+    className="clear-completed"
+    type="button"
+    onClick={clearCompleted}
   >
     Clear completed
   </button>

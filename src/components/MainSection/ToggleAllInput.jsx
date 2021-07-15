@@ -1,5 +1,9 @@
-/* eslint-disable import/prefer-default-export */
-import React, { useContext, useEffect, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from 'react'
 import PropTypes from 'prop-types'
 import Context from '../../utils/context'
 
@@ -8,21 +12,25 @@ const ToggleAllInput = ({ allTodos }) => {
   const { toggleAll } = useContext(Context)
 
   useEffect(() => {
-    setChecked(allTodos.filter((todo) => !todo.completed).length === 0)
+    setChecked(
+      allTodos.filter((todo) => !todo.completed).length === 0
+    )
   }, [allTodos])
+
+  const handlerToggleAll = useCallback(() => {
+    toggleAll(!isChecked)
+  })
 
   return (
     <>
       <input
-        id='toggle-all'
-        className='toggle-all'
-        type='checkbox'
+        id="toggle-all"
+        className="toggle-all"
+        type="checkbox"
         checked={isChecked}
-        onChange={() => {
-          toggleAll(!isChecked)
-        }}
+        onChange={handlerToggleAll}
       />
-      <label htmlFor='toggle-all' />
+      <label htmlFor="toggle-all" />
     </>
   )
 }

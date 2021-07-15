@@ -1,12 +1,16 @@
 /* eslint-disable react/forbid-prop-types */
 import React from 'react'
 import PropTypes from 'prop-types'
-import ToggleAllInput from '../ToggleAllInput'
-import TodoList from '../Todo/TodoList'
+import ToggleAllInput from './ToggleAllInput'
+import TodoList from './TodoList'
 
-// eslint-disable-next-line object-curly-newline
-const MainSection = ({ todos, allTodos, changeStatus, removeTodo }) => (
-  <section className='main'>
+const MainSection = ({
+  todos,
+  allTodos,
+  changeStatus,
+  removeTodo
+}) => (
+  <section className="main">
     <ToggleAllInput allTodos={allTodos} />
     <TodoList
       todos={todos}

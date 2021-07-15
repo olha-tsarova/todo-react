@@ -1,7 +1,7 @@
 export const filters = {
-  filter_completed: 'completed',
-  filter_active: 'active',
-  filter_all: 'all'
+  completed: 'Completed',
+  active: 'Active',
+  all: 'All'
 }
 
 export const endpoints = {
@@ -18,3 +18,9 @@ export const fetchMethods = {
   M_PATCH: 'PATCH',
   M_DELETE: 'DELETE'
 }
+
+export const buttons = [
+  { key: filters.all, title: filters.all },
+  { key: filters.active, title: filters.active },
+  { key: filters.completed, title: filters.completed }
+]

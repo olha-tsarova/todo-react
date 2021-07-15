@@ -21,6 +21,8 @@ module.exports = {
   rules: {
     'no-console': 'off',
     semi: 0,
-    'comma-dangle': ['error', 'never']
+    'comma-dangle': ['error', 'never'],
+    'import/extensions': 'off',
+    'import/no-unresolved': 'off'
   }
 }
